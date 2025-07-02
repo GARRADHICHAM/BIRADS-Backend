@@ -15,6 +15,7 @@ python-dotenv
 pymongo
 bson
 matplotlib
+email-validator
 scipy
 pydicom
 imageio
