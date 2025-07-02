@@ -29,6 +29,14 @@ from skimage import morphology
 
 # from models.ai_model import model
 
+import boto3
+import os
+
+def download_model_from_s3(bucket_name, object_key, local_path):
+    s3 = boto3.client('s3')
+    if not os.path.exists(local_path):
+        s3.download_file(bucket_name, object_key, local_path)
+
 router = APIRouter()
 
 
@@ -112,20 +120,31 @@ model2.compile(
     metrics=['accuracy']
 )
 
-# Load only the weights
-try:
-    model2.load_weights("E:/Segmentation-BIRADS/BackEnd/routers/unet_mammography_best_model.h5")
-    print("Model weights loaded successfully!")
-except:
-    # If loading the whole weights file doesn't work, try loading just the weights
-    # This is for TensorFlow 2.x compatibility
-    try:
-        model.load_weights("unet_mammography_best_model.h5", by_name=True, skip_mismatch=True)
-        print("Model weights loaded with name mapping!")
-    except Exception as e:
-        print(f"Error loading weights: {e}")
+# # Load only the weights
+# try:
+#     model2.load_weights("E:/Segmentation-BIRADS/BackEnd/routers/unet_mammography_best_model.h5")
+#     print("Model weights loaded successfully!")
+# except:
+#     # If loading the whole weights file doesn't work, try loading just the weights
+#     # This is for TensorFlow 2.x compatibility
+#     try:
+#         model.load_weights("unet_mammography_best_model.h5", by_name=True, skip_mismatch=True)
+#         print("Model weights loaded with name mapping!")
+#     except Exception as e:
+#         print(f"Error loading weights: {e}")
         
+# Set your S3 bucket and key
+S3_BUCKET = "aimodel-seg"
+S3_KEY = "https://aimodel-seg.s3.eu-north-1.amazonaws.com/unet_mammography_best_model.h5"
+LOCAL_MODEL_PATH = "routers/unet_mammography_best_model.h5"
 
+# Download the model from S3 if not present
+download_model_from_s3(S3_BUCKET, S3_KEY, LOCAL_MODEL_PATH)
+
+# Build and load the model as before
+model2 = build_unet_model(input_shape=(256, 256, 1))
+model2.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+model2.load_weights(LOCAL_MODEL_PATH)
 
 @router.post("/upload-image")
 async def upload_image(

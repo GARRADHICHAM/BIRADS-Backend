@@ -6,6 +6,14 @@ from tensorflow.keras.applications import ResNet50
 from tensorflow.keras.optimizers import Adam
 import os
 
+import boto3
+import os
+
+def download_model_from_s3(bucket_name, object_key, local_path):
+    s3 = boto3.client('s3')
+    if not os.path.exists(local_path):
+        s3.download_file(bucket_name, object_key, local_path)
+        
 # First, recreate the loss functions and metrics used in the original model
 def dice_coef(y_true, y_pred, smooth=1):
     y_true_f = tf.keras.backend.flatten(y_true)
@@ -124,10 +132,27 @@ def create_resnet50_unet_improved(input_shape=(512, 512, 1), n_classes=1):
 
     return model
 
-# Load the model
+
+
+# # Load the model
+# def load_model():
+#     model = create_resnet50_unet_improved(input_shape=(512, 512, 1))
+#     model.load_weights("E:/Segmentation-BIRADS/BackEnd/routers/unet_mammography_best_model.h5")
+#     return model
+
 def load_model():
-    model = create_resnet50_unet_improved(input_shape=(512, 512, 1))
-    model.load_weights("E:/Segmentation-BIRADS/BackEnd/routers/unet_mammography_best_model.h5")
+    # Set your S3 bucket and key
+    S3_BUCKET = "aimodel-seg "
+    S3_KEY = "https://aimodel-seg.s3.eu-north-1.amazonaws.com/unet_mammography_best_model.h5"
+    LOCAL_MODEL_PATH = "routers/unet_mammography_best_model.h5"
+
+    # Download the model from S3 if not present
+    download_model_from_s3(S3_BUCKET, S3_KEY, LOCAL_MODEL_PATH)
+
+    # Build and load the model as before
+    model = create_resnet50_unet_improved(input_shape=(256, 256, 1))
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    model.load_weights(LOCAL_MODEL_PATH)
     return model
 
 # Create a singleton instance

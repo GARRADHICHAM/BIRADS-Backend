@@ -19,6 +19,7 @@ scipy
 pydicom
 imageio
 jose
+python-jose[cryptography]==3.3.0
 passlib
 torch
 torchvision
