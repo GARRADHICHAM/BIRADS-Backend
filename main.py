@@ -26,3 +26,11 @@ async def hello():
 @app.get("/protected-hello")
 def protected_hello(current_user = Depends(get_current_active_user)):
     return f"Hello {current_user.username}, this is a protected endpoint."
+
+@app.get("/")
+def read_root():
+    return {"Hello": "World"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
