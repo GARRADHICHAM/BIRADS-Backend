@@ -1,8 +1,8 @@
 fastapi
 uvicorn
-tensorflow==2.15.0
+tensorflow-cpu==2.15.0
 pillow
-numpy
+numpy==1.24.3
 python-multipart
 boto3
 botocore
@@ -10,11 +10,12 @@ pydantic
 sqlalchemy
 requests
 scikit-learn
-opencv-python
+opencv-python-headless==4.8.1.78
+scikit-image==0.22.0
 python-dotenv
 pymongo
 bson
-matplotlib
+matplotlib==3.7.2
 email-validator
 scipy
 pydicom
